@@ -1,0 +1,41 @@
+body {
+  font-family: Arial, sans-serif;
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+  background-color: white;
+  color: #6a1b9a;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #6a1b9a;
+}
+
+#region-selector-label {
+  font-weight: bold;
+  margin-right: 15px;
+}
+
+#region-selector {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.radio-item {
+  display: inline-block;
+  margin-right: 15px;
+  cursor: pointer;
+}
+
+#sales-line-chart {
+  background-color: white;
+}
+
+.footer-text {
+  text-align: center;
+  margin-top: 20px;
+  color: #555;
+  font-style: italic;
+}

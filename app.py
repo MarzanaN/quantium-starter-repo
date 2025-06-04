@@ -1,41 +1,74 @@
 import dash
-from dash import dcc, html
+from dash import dcc, html, Input, Output
 import pandas as pd
 import plotly.express as px
 
-# Load processed data from the CSV you created earlier
 df = pd.read_csv('processed_sales.csv')
-
-# Convert date column to datetime for sorting and plotting
 df['date'] = pd.to_datetime(df['date'])
 
-# Aggregate sales by date (sum sales for each date)
-daily_sales = df.groupby('date')['Sales'].sum().reset_index()
-
-# Sort by date just to be sure
-daily_sales = daily_sales.sort_values('date')
-
-# Create Dash app
 app = dash.Dash(__name__)
 
-app.layout = html.Div(children=[
-    html.H1(children='Soul Foods Pink Morsel Sales Visualiser'),
+app.layout = html.Div([
+    html.H1("Soul Foods Pink Morsel Sales Visualiser"),
 
-    dcc.Graph(
-        id='sales-line-chart',
-        figure=px.line(
-            daily_sales,
-            x='date',
-            y='Sales',
-            title='Daily Sales of Pink Morsels',
-            labels={'date': 'Date', 'Sales': 'Total Sales (£)'}
-        )
-    ),
+    html.Div([
+        html.Label("Filter by Region:", id='region-selector-label'),
+        dcc.RadioItems(
+            id='region-selector',
+            options=[
+                {'label': 'All', 'value': 'all'},
+                {'label': 'North', 'value': 'north'},
+                {'label': 'East', 'value': 'east'},
+                {'label': 'South', 'value': 'south'},
+                {'label': 'West', 'value': 'west'},
+            ],
+            value='all',
+            labelClassName='radio-item',  
+            inputClassName='radio-input'  
+        ),
+    ], id='region-selector'),
 
-    html.Div(children='''
-        Sales before and after the price increase on 15th January 2021
-    ''')
+    dcc.Graph(id='sales-line-chart'),
+
+    html.Div(
+        "Sales before and after the price increase on 15th January 2021",
+        className='footer-text'
+    )
 ])
+
+
+@app.callback(
+    Output('sales-line-chart', 'figure'),
+    Input('region-selector', 'value')
+)
+def update_line_chart(selected_region):
+    if selected_region == 'all':
+        filtered_df = df.copy()
+    else:
+        filtered_df = df[df['region'].str.lower() == selected_region]
+
+    daily_sales = filtered_df.groupby('date')['Sales'].sum().reset_index()
+    daily_sales = daily_sales.sort_values('date')
+
+    fig = px.line(
+        daily_sales,
+        x='date',
+        y='Sales',
+        title=f'Daily Sales of Pink Morsels ({selected_region.capitalize()})',
+        labels={'date': 'Date', 'Sales': 'Total Sales (£)'}
+    )
+
+    fig.update_layout(
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        font=dict(color='#6a1b9a'),
+        title_font=dict(size=20, family='Arial'),
+        xaxis=dict(showgrid=True, gridcolor='lightgrey'),
+        yaxis=dict(showgrid=True, gridcolor='lightgrey'),
+    )
+
+    return fig
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
